@@ -4,23 +4,20 @@
   const GEMINI_URL = 'https://gemini.google.com';
   const DEFAULT_W  = 420;
 
-  // ── Persisted state ───────────────────────────────────────────────────────
-  let st = { mode: 'float', x: null, y: null, width: DEFAULT_W };
-  try { Object.assign(st, JSON.parse(localStorage.getItem('aisidebar') || '{}')); } catch (_) {}
-  function save() {
-    try { localStorage.setItem('aisidebar', JSON.stringify(st)); } catch (_) {}
-  }
+  // ── State (loaded from chrome.storage.local after sidebar is built) ───────
+  let st = { mode: 'float', x: null, y: null, width: DEFAULT_W, collapsed: false };
+
+  function save() { chrome.storage.local.set({ aisidebar: st }); }
 
   // ── Root ──────────────────────────────────────────────────────────────────
   const root = document.createElement('div');
   root.id = 'aisidebar-root';
-  root._mode = st.mode;
   Object.assign(root.style, {
     position: 'fixed', zIndex: '2147483647',
     display: 'flex', flexDirection: 'column',
     background: '#fff', overflow: 'hidden',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    width: st.width + 'px',
+    width: DEFAULT_W + 'px',
   });
 
   // ── Header ────────────────────────────────────────────────────────────────
@@ -32,9 +29,7 @@
     userSelect: 'none', flexShrink: '0', cursor: 'grab',
   });
 
-  // ── Collapse / expand on label click ─────────────────────────────────────
-  let collapsed = false;
-
+  // Label (collapse toggle)
   const label = document.createElement('span');
   label.textContent = 'Gemini ▾';
   Object.assign(label.style, {
@@ -42,25 +37,10 @@
     cursor: 'pointer', userSelect: 'none',
   });
   label.addEventListener('click', () => {
-    collapsed = !collapsed;
-    const headerH = header.offsetHeight + 'px';
-    if (collapsed) {
-      iframe.style.display = 'none';
-      root.style.height = headerH;
-      root.style.minHeight = headerH;
-      label.textContent = 'Gemini ▸';
-      if (st.mode === 'split') document.documentElement.style.marginRight = '';
-    } else {
-      iframe.style.display = 'flex';
-      root.style.minHeight = '';
-      root.style.height = st.mode === 'split' ? '100vh' : '80vh';
-      label.textContent = 'Gemini ▾';
-      if (st.mode === 'split') document.documentElement.style.marginRight = st.width + 'px';
-    }
+    st.collapsed = !st.collapsed;
+    applyCollapsed();
+    save();
   });
-
-  header.appendChild(label);
-  header.appendChild(sep());
 
   // Reload button
   const reloadBtn = hdrBtn(
@@ -68,8 +48,6 @@
     '刷新 Gemini'
   );
   reloadBtn.addEventListener('click', () => { iframe.src = GEMINI_URL; });
-  header.appendChild(reloadBtn);
-  header.appendChild(sep());
 
   // Float button
   const floatBtn = hdrBtn(
@@ -85,17 +63,14 @@
   );
   splitBtn.addEventListener('click', () => setMode('split'));
 
-  header.appendChild(floatBtn);
-  header.appendChild(splitBtn);
-  header.appendChild(sep());
-
   // Close button
   const closeBtn = hdrBtn(
     `<svg width="11" height="11" viewBox="0 0 11 11"><line x1="1" y1="1" x2="10" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="10" y1="1" x2="1" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
     '关闭'
   );
   closeBtn.addEventListener('click', hide);
-  header.appendChild(closeBtn);
+
+  header.append(label, sep(), reloadBtn, sep(), floatBtn, splitBtn, sep(), closeBtn);
 
   // ── iframe ────────────────────────────────────────────────────────────────
   const iframe = document.createElement('iframe');
@@ -112,7 +87,7 @@
 
   root.append(resizer, header, iframe);
 
-  // ── Toggle tab ────────────────────────────────────────────────────────────
+  // ── Toggle tab (shown when sidebar is closed) ─────────────────────────────
   const toggleTab = document.createElement('button');
   toggleTab.id = 'aisidebar-tab';
   toggleTab.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -127,14 +102,14 @@
 
   document.documentElement.append(root, toggleTab);
 
-  // ── Layout ────────────────────────────────────────────────────────────────
+  // ── Layout functions ──────────────────────────────────────────────────────
   function applyFloat() {
     const x = st.x !== null ? st.x : (window.innerWidth - st.width - 16);
     const y = st.y !== null ? st.y : 60;
     Object.assign(root.style, {
       top: y + 'px', left: x + 'px', right: '', bottom: '',
-      width: st.width + 'px', height: '80vh', borderRadius: '12px',
-      boxShadow: '0 4px 24px rgba(0,0,0,0.16)',
+      width: st.width + 'px', height: '80vh',
+      borderRadius: '12px', boxShadow: '0 4px 24px rgba(0,0,0,0.16)',
     });
     document.documentElement.style.marginRight = '';
     document.documentElement.style.transition  = '';
@@ -152,8 +127,25 @@
     header.style.cursor = 'default';
   }
 
+  function applyCollapsed() {
+    if (st.collapsed) {
+      const h = header.offsetHeight + 'px';
+      iframe.style.display = 'none';
+      root.style.height = h;
+      root.style.minHeight = h;
+      label.textContent = 'Gemini ▸';
+      if (st.mode === 'split') document.documentElement.style.marginRight = '';
+    } else {
+      iframe.style.display = 'flex';
+      root.style.minHeight = '';
+      root.style.height = st.mode === 'split' ? '100vh' : '80vh';
+      label.textContent = 'Gemini ▾';
+      if (st.mode === 'split') document.documentElement.style.marginRight = st.width + 'px';
+    }
+  }
+
   function setMode(m) {
-    st.mode = m; root._mode = m; save();
+    st.mode = m; save();
     if (m === 'float') {
       applyFloat();
       floatBtn.style.background = '#e8f0fe'; floatBtn.style.color = '#1a73e8';
@@ -163,9 +155,8 @@
       splitBtn.style.background = '#e8f0fe'; splitBtn.style.color = '#1a73e8';
       floatBtn.style.background = 'transparent'; floatBtn.style.color = '#5f6368';
     }
+    if (st.collapsed) applyCollapsed();
   }
-  // Expose for background.js
-  root.__setMode = setMode;
 
   function hide() {
     root.style.display = 'none';
@@ -176,13 +167,13 @@
   function show() {
     root.style.display = 'flex';
     toggleTab.style.display = 'none';
-    if (st.mode === 'split') applySplit();
+    if (st.mode === 'split' && !st.collapsed) applySplit();
   }
 
   // ── Drag (float only) ─────────────────────────────────────────────────────
   let dragging = false, dx, dy, ox, oy;
   header.addEventListener('mousedown', (e) => {
-    if (st.mode !== 'float' || e.target.closest('button')) return;
+    if (st.mode !== 'float' || e.target.closest('button') || st.collapsed) return;
     dragging = true; dx = e.clientX; dy = e.clientY;
     const r = root.getBoundingClientRect(); ox = r.left; oy = r.top;
     iframe.style.pointerEvents = 'none';
@@ -237,7 +228,9 @@
     });
     b.addEventListener('mouseenter', () => b.style.background = '#e8eaed');
     b.addEventListener('mouseleave', () => {
-      if (b !== floatBtn && b !== splitBtn) b.style.background = 'transparent';
+      const active = (b === floatBtn && st.mode === 'float') ||
+                     (b === splitBtn && st.mode === 'split');
+      b.style.background = active ? '#e8f0fe' : 'transparent';
     });
     return b;
   }
@@ -248,6 +241,16 @@
     return d;
   }
 
-  // ── Init ──────────────────────────────────────────────────────────────────
-  setMode(st.mode);
+  // ── Init: apply defaults first, then load saved state ────────────────────
+  setMode('float'); // default
+
+  chrome.storage.local.get(['aisidebar'], (result) => {
+    if (result.aisidebar) {
+      Object.assign(st, result.aisidebar);
+      root.style.width = st.width + 'px';
+      setMode(st.mode);
+      applyCollapsed();
+    }
+  });
+
 })();

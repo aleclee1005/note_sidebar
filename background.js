@@ -17,13 +17,6 @@ function toggleInTab(tabId) {
   });
 }
 
-// Keyboard shortcut
-chrome.commands.onCommand.addListener(async (command) => {
-  if (command !== 'toggle-sidebar') return;
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab?.url?.startsWith('http')) toggleInTab(tab.id);
-});
-
 // Message from popup.js
 chrome.runtime.onMessage.addListener(async (msg) => {
   if (msg.action === 'toggle') {
