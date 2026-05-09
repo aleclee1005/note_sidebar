@@ -173,7 +173,7 @@
   // ── Drag (float only) ─────────────────────────────────────────────────────
   let dragging = false, dx, dy, ox, oy;
   header.addEventListener('mousedown', (e) => {
-    if (st.mode !== 'float' || e.target.closest('button') || st.collapsed) return;
+    if (st.mode !== 'float' || e.target.closest('button')) return;
     dragging = true; dx = e.clientX; dy = e.clientY;
     const r = root.getBoundingClientRect(); ox = r.left; oy = r.top;
     iframe.style.pointerEvents = 'none';
@@ -240,6 +240,9 @@
     Object.assign(d.style, { width: '1px', height: '18px', background: '#e0e0e0', flexShrink: '0' });
     return d;
   }
+
+  // Expose setMode for background.js
+  root.__setMode = setMode;
 
   // ── Init: apply defaults first, then load saved state ────────────────────
   setMode('float'); // default
