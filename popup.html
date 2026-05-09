@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gemini Sidebar</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 260px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #fff; color: #1a1a2e;
+    }
+    .header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    .logo {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: #e8f0fe; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .logo img { width: 22px; height: 22px; }
+    .title { font-size: 15px; font-weight: 700; color: #1a73e8; }
+    .version { font-size: 11px; color: #9aa0a6; margin-top: 1px; }
+
+    .section { padding: 12px 16px; border-bottom: 1px solid #f1f3f4; }
+    .section-label {
+      font-size: 10px; font-weight: 600; color: #9aa0a6;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+
+    .toggle-btn {
+      width: 100%; padding: 9px; border: none; border-radius: 8px;
+      background: #1a73e8; color: #fff; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .toggle-btn:hover { background: #1557b0; }
+
+    .mode-row { display: flex; gap: 8px; }
+    .mode-btn {
+      flex: 1; padding: 7px 0; border: 1.5px solid #e0e0e0; border-radius: 8px;
+      background: #fff; font-size: 12px; font-weight: 600; color: #5f6368;
+      cursor: pointer; transition: all 0.15s; display: flex;
+      align-items: center; justify-content: center; gap: 5px;
+    }
+    .mode-btn:hover { border-color: #1a73e8; color: #1a73e8; }
+    .mode-btn.active { background: #e8f0fe; border-color: #1a73e8; color: #1a73e8; }
+
+    .shortcut-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px;
+    }
+    .shortcut-label { font-size: 12px; color: #5f6368; }
+    .keys { display: flex; gap: 3px; align-items: center; }
+    kbd {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #f1f3f4; border: 1px solid #dadce0; border-radius: 4px;
+      padding: 2px 6px; font-size: 11px; font-family: inherit; color: #3c4043;
+    }
+    .keys span { font-size: 10px; color: #9aa0a6; }
+
+    .footer {
+      padding: 8px 16px; font-size: 10px; color: #9aa0a6; text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <img src="icons/icon48.png" alt="logo" />
+    </div>
+    <div>
+      <div class="title">Gemini Sidebar</div>
+      <div class="version">v1.2.0</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <button class="toggle-btn" id="toggleBtn">Toggle Sidebar</button>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Layout Mode</div>
+    <div class="mode-row">
+      <button class="mode-btn" id="floatBtn">
+        <svg width="13" height="13" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="5" y="5" width="8" height="8" rx="1.5" fill="currentColor"/></svg>
+        Float
+      </button>
+      <button class="mode-btn" id="splitBtn">
+        <svg width="13" height="13" viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="1.5"/></svg>
+        Split
+      </button>
+    </div>
+  </div>
+
+  <div class="shortcut-row">
+    <span class="shortcut-label">Toggle shortcut</span>
+    <div class="keys">
+      <kbd>⌘</kbd><span>+</span><kbd>Shift</kbd><span>+</span><kbd>G</kbd>
+    </div>
+  </div>
+
+  <div class="footer">Works on any http/https page</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
