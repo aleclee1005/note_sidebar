@@ -1,3 +1,7 @@
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+});
+
 function toggleInTab(tabId) {
   chrome.scripting.executeScript({
     target: { tabId },
@@ -17,11 +21,20 @@ function toggleInTab(tabId) {
   });
 }
 
+// Auto-open NotebookLM side panel for every new tab
+chrome.tabs.onCreated.addListener((tab) => {
+  chrome.sidePanel.open({ windowId: tab.windowId }).catch(() => {});
+});
+
 // Message from popup.js
 chrome.runtime.onMessage.addListener(async (msg) => {
   if (msg.action === 'toggle') {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab?.url?.startsWith('http')) toggleInTab(tab.id);
+  }
+  if (msg.action === 'openNotebook') {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    chrome.sidePanel.open({ windowId: tab.windowId }).catch(() => {});
   }
   if (msg.action === 'setMode') {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
