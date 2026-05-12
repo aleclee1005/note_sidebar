@@ -36,6 +36,7 @@
   // ── Header ────────────────────────────────────────────────────────────────
   const header = document.createElement('div');
   Object.assign(header.style, {
+    position: 'relative',
     display: 'flex', alignItems: 'center', gap: '4px',
     padding: '7px 8px', background: '#f8f9fa',
     borderBottom: '1px solid #e8eaed',
@@ -93,7 +94,33 @@
   );
   closeBtn.addEventListener('click', hide);
 
-  header.append(collapseBtn, geminiTab, notebookTab, spacer, sep(), reloadBtn, sep(), floatBtn, splitBtn, sep(), closeBtn);
+  // Add-to-NotebookLM button (in header)
+  const addNbHdrBtn = hdrBtn(
+    `<svg width="12" height="12" viewBox="0 0 12 12"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+    '添加到 NotebookLM'
+  );
+  addNbHdrBtn.addEventListener('mouseenter', () => { addNbHdrBtn.style.background = '#e6f4ea'; addNbHdrBtn.style.color = '#34a853'; });
+  addNbHdrBtn.addEventListener('mouseleave', () => { addNbHdrBtn.style.background = 'transparent'; addNbHdrBtn.style.color = '#5f6368'; });
+
+  const nbHdrToast = document.createElement('div');
+  Object.assign(nbHdrToast.style, {
+    position: 'absolute', top: '100%', right: '4px', marginTop: '4px',
+    zIndex: '10', background: 'rgba(0,0,0,0.80)', color: '#fff',
+    borderRadius: '8px', padding: '8px 10px', fontSize: '11px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+    lineHeight: '1.5', display: 'none', whiteSpace: 'nowrap',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.2)', pointerEvents: 'none',
+  });
+  nbHdrToast.innerHTML = '✓ 链接已复制！<br>在 NotebookLM 点 <b>Add source → Website</b> 粘贴';
+
+  addNbHdrBtn.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(window.location.href).catch(() => {});
+    chrome.runtime.sendMessage({ action: 'openNotebook' });
+    nbHdrToast.style.display = 'block';
+    setTimeout(() => { nbHdrToast.style.display = 'none'; }, 3500);
+  });
+
+  header.append(nbHdrToast, collapseBtn, geminiTab, notebookTab, spacer, sep(), addNbHdrBtn, sep(), reloadBtn, sep(), floatBtn, splitBtn, sep(), closeBtn);
 
   // ── iframe ────────────────────────────────────────────────────────────────
   const iframe = document.createElement('iframe');
@@ -123,42 +150,7 @@
   });
   toggleTab.addEventListener('click', show);
 
-  // ── Add to NotebookLM button ─────────────────────────────────────────────
-  const addNbBtn = document.createElement('button');
-  addNbBtn.id = 'aisidebar-add-nb';
-  addNbBtn.title = '添加到 NotebookLM';
-  addNbBtn.textContent = '+ NotebookLM';
-  Object.assign(addNbBtn.style, {
-    position: 'fixed', left: '16px', top: '80px',
-    zIndex: '2147483647', background: '#34a853', color: '#fff',
-    border: 'none', borderRadius: '20px', padding: '7px 14px',
-    fontSize: '12px', fontWeight: '700', cursor: 'pointer',
-    fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.2)', transition: 'background 0.15s',
-    display: 'block',
-  });
-  addNbBtn.addEventListener('mouseenter', () => addNbBtn.style.background = '#2d9147');
-  addNbBtn.addEventListener('mouseleave', () => addNbBtn.style.background = '#34a853');
-
-  const nbToast = document.createElement('div');
-  Object.assign(nbToast.style, {
-    position: 'fixed', left: '16px', top: '130px',
-    zIndex: '2147483646', background: 'rgba(0,0,0,0.78)', color: '#fff',
-    borderRadius: '10px', padding: '9px 14px', fontSize: '12px',
-    fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-    lineHeight: '1.5', display: 'none', maxWidth: '220px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-  });
-  nbToast.innerHTML = '✓ 链接已复制！<br>在 NotebookLM 点 <b>Add source → Website</b> 粘贴';
-
-  addNbBtn.addEventListener('click', async () => {
-    await navigator.clipboard.writeText(window.location.href).catch(() => {});
-    chrome.runtime.sendMessage({ action: 'openNotebook' });
-    nbToast.style.display = 'block';
-    setTimeout(() => { nbToast.style.display = 'none'; }, 3500);
-  });
-
-  document.documentElement.append(root, toggleTab, addNbBtn, nbToast);
+  document.documentElement.append(root, toggleTab);
 
   // ── Layout functions ──────────────────────────────────────────────────────
   function applyFloat() {
