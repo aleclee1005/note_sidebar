@@ -3,13 +3,36 @@
 <head>
   <meta charset="utf-8">
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-    iframe { display: block; width: 100%; height: 100%; border: none; }
+    html, body {
+      margin: 0; padding: 0; width: 100%; height: 100%;
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    iframe { flex: 1; border: none; min-height: 0; }
+    #drive-notice {
+      display: flex; align-items: center; justify-content: center;
+      gap: 4px; flex-shrink: 0; white-space: nowrap;
+      padding: 5px 10px;
+      background: #fef7e0; border-top: 1px solid #f9c74f;
+      font-size: 11px; color: #5f5400;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    #drive-notice a {
+      color: #1a73e8; font-weight: 600;
+      text-decoration: none; cursor: pointer;
+    }
+    #drive-notice a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <iframe src="https://notebooklm.google.com"
           allow="fullscreen; clipboard-read; clipboard-write; microphone">
   </iframe>
+
+  <div id="drive-notice">
+    ⚠️ Drive unavailable in sidebar —
+    <a id="open-tab-link">Open in new tab</a> to use Drive.
+  </div>
+
+  <script src="sidepanel.js"></script>
 </body>
 </html>

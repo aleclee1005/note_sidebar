@@ -9,7 +9,7 @@
 
   const btn = document.createElement('button');
   btn.id = 'nb-fab-btn';
-  btn.title = '添加到 NotebookLM';
+  btn.title = 'Add to NotebookLM';
   btn.textContent = '+';
   btn.style.cssText = [
     'all:initial',
@@ -49,7 +49,7 @@
     'white-space:nowrap',
     'pointer-events:none',
   ].join(';');
-  toast.innerHTML = '✓ 链接已复制！<br>在 NotebookLM 点 <b style="font-weight:700">Add source → Website</b> 粘贴';
+  toast.innerHTML = '✓ Link copied!<br>In NotebookLM, click <b style="font-weight:700">Add source → Website</b> and paste.';
 
   btn.addEventListener('mouseenter', () => { btn.style.background = '#333'; });
   btn.addEventListener('mouseleave', () => { btn.style.background = '#1a1a1a'; });

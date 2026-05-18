@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Note Sidebar",
   "version": "1.2.0",
-  "description": "Floating or split-screen AI sidebar — Gemini & NotebookLM",
+  "description": "Open NotebookLM in a Chrome side panel on any page, and add the current page as a source with one click.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -22,21 +22,13 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "run_at": "document_idle",
-      "exclude_matches": ["https://gemini.google.com/*", "https://notebooklm.google.com/*"]
-    },
-    {
-      "matches": ["<all_urls>"],
       "js": ["inject_button.js"],
       "run_at": "document_idle",
       "exclude_matches": ["https://gemini.google.com/*", "https://notebooklm.google.com/*"]
     }
   ],
   "permissions": [
-    "storage",
     "declarativeNetRequest",
-    "scripting",
     "tabs",
     "sidePanel"
   ],

@@ -7,7 +7,7 @@
 
   // ── State ─────────────────────────────────────────────────────────────────
   let st = { mode: 'float', x: null, y: null, width: DEFAULT_W, collapsed: true, service: 'gemini' };
-  function save() { chrome.storage.local.set({ aisidebar: st }); }
+  function save() { try { chrome.storage.local.set({ aisidebar: st }); } catch (e) {} }
 
   // ── Root (shadow host) — only positioning lives here ──────────────────────
   const root = document.createElement('div');
@@ -195,7 +195,7 @@
   }
 
   function setMode(m) {
-    st.mode = m; save();
+    st.mode = m; root._mode = m; save();
     if (m === 'float') {
       applyFloat();
       floatBtn.style.background = '#e8f0fe'; floatBtn.style.color = '#1a73e8';
@@ -335,7 +335,7 @@
   updateServiceTabs();
   applyCollapsed();
 
-  chrome.storage.local.get(['aisidebar'], (result) => {
+  try { chrome.storage.local.get(['aisidebar'], (result) => {
     if (result.aisidebar) {
       Object.assign(st, result.aisidebar, { collapsed: true });
       root.style.width = st.width + 'px';
@@ -343,6 +343,6 @@
       updateServiceTabs();
       applyCollapsed();
     }
-  });
+  }); } catch (e) {}
 
 })();
